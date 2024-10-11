@@ -6,3 +6,4 @@ qdrant-client
 langchain-anthropic
 langchain-openai
 langchain-huggingface
+chainlit
