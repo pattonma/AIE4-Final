@@ -30,21 +30,21 @@ chat_prompt = ChatPromptTemplate.from_messages([("system", rag_system_prompt_tem
 
 @cl.on_chat_start
 async def on_chat_start():
-    qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
-    qdrant_store = Qdrant(
-        client=qdrant_client,
-        collection_name="kai_test_docs",
-        embeddings=te3_small
-    )
-    retriever = qdrant_store.as_retriever()
+    # qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
+    # qdrant_store = Qdrant(
+    #     client=qdrant_client,
+    #     collection_name="kai_test_docs",
+    #     embeddings=te3_small
+    # )
+    # retriever = qdrant_store.as_retriever()
 
-    global retrieval_augmented_qa_chain
-    retrieval_augmented_qa_chain = (
-        {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
-        | RunnablePassthrough.assign(context=itemgetter("context"))
-        | chat_prompt
-        | chat_model
-    )
+    # global retrieval_augmented_qa_chain
+    # retrieval_augmented_qa_chain = (
+    #     {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
+    #     | RunnablePassthrough.assign(context=itemgetter("context"))
+    #     | chat_prompt
+    #     | chat_model
+    # )
 
     await cl.Message(content="YAsk away!").send()
 
