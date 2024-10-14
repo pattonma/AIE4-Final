@@ -15,7 +15,7 @@ import os
 chat_model = ChatOpenAI(model="gpt-4o-mini")
 te3_small = OpenAIEmbeddings(model="text-embedding-3-small")
 set_llm_cache(InMemoryCache())
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=100)
 rag_system_prompt_template = """\
 You are a helpful assistant that uses the provided context to answer questions. Never reference this prompt, or the existance of context.
 """
