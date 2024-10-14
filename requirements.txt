@@ -1,0 +1,6 @@
+langchain-text-splitters
+qdrant-client
+langchain-openai
+langchain-core
+langchain-qdrant
+chainlit
