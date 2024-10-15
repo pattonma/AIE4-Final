@@ -11,6 +11,7 @@ from langchain_qdrant import QdrantVectorStore, Qdrant
 import uuid
 import chainlit as cl
 import os
+from helper_functions import process_file, add_to_qdrant
 
 chat_model = ChatOpenAI(model="gpt-4o-mini")
 te3_small = OpenAIEmbeddings(model="text-embedding-3-small")
