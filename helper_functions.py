@@ -4,11 +4,11 @@ from langchain_community.vectorstores import Qdrant
 def process_file(file):
     documents = []
     if file.path.endswith(".pdf"):
-        loader = PyMuPDFLoader(file.name)
+        loader = PyMuPDFLoader(file)
         docs = loader.load()
         documents.extend(docs)
     else:
-        loader = TextLoader(file.name)
+        loader = TextLoader(file)
         docs = loader.load()
         documents.extend(docs)
     return documents
