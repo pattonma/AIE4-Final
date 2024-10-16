@@ -3,11 +3,11 @@ from langchain_openai import ChatOpenAI
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.tracers import LangChainTracer
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
-from langchain_community.embeddings import HuggingFaceInstructEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import constants
 import os
 
@@ -24,7 +24,7 @@ opus3 = ChatAnthropic(
     api_key=constants.ANTRHOPIC_API_KEY, 
     temperature=0, 
     model='claude-3-opus-20240229',
-    callback_manager=callback_manager
+    callbacks=callback_manager
 )
 
 sonnet35 = ChatAnthropic(
@@ -32,7 +32,7 @@ sonnet35 = ChatAnthropic(
     temperature=0, 
     model='claude-3-5-sonnet-20240620',
     max_tokens=4096,
-    callback_manager=callback_manager
+    callbacks=callback_manager
 )
 
 gpt4 = ChatOpenAI(
@@ -42,7 +42,7 @@ gpt4 = ChatOpenAI(
     timeout=None,
     max_retries=2,
     api_key=constants.OPENAI_API_KEY,
-    callback_manager=callback_manager
+    callbacks=callback_manager
 )
 
 gpt4o = ChatOpenAI(
@@ -52,7 +52,7 @@ gpt4o = ChatOpenAI(
     timeout=None,
     max_retries=2,
     api_key=constants.OPENAI_API_KEY,
-    callback_manager=callback_manager
+    callbacks=callback_manager
 )
 
 gpt4o_mini = ChatOpenAI(
@@ -62,7 +62,7 @@ gpt4o_mini = ChatOpenAI(
     timeout=None,
     max_retries=2,
     api_key=constants.OPENAI_API_KEY,
-    callback_manager=callback_manager
+    callbacks=callback_manager
 )
 
 basic_embeddings = HuggingFaceEmbeddings(model_name="snowflake/snowflake-arctic-embed-l")
@@ -76,4 +76,11 @@ te3_small = OpenAIEmbeddings(api_key=constants.OPENAI_API_KEY, model="text-embed
 semanticChunker = SemanticChunker(
     te3_small,
     breakpoint_threshold_type="percentile"
+)
+
+RCTS = RecursiveCharacterTextSplitter(
+    # Set a really small chunk size, just to show.
+    chunk_size=500,
+    chunk_overlap=25,
+    length_function=len,
 )
