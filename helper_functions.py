@@ -10,7 +10,7 @@ def process_file(uploaded_file):
        file_name = uploaded_file.name
 
     documents = []
-    if file.path.endswith(".pdf"):
+    if uploaded_file.path.endswith(".pdf"):
         loader = PyMuPDFLoader(temp_file)
         docs = loader.load()
         documents.extend(docs)
