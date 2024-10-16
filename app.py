@@ -55,7 +55,7 @@ async def on_chat_start():
     qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
     qdrant_store = Qdrant(
         client=qdrant_client,
-        collection_name=collection_name,
+        collection_name="kai_test_docs",
         embeddings=te3_small
     )
 
