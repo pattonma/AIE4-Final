@@ -29,16 +29,81 @@ Context:
 """
 chat_prompt = ChatPromptTemplate.from_messages([("system", rag_system_prompt_template), ("human", rag_user_prompt_template)])
 
+# @cl.on_chat_start
+# async def on_chat_start():
+#     qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
+#     qdrant_store = Qdrant(
+#         client=qdrant_client,
+#         collection_name="kai_test_docs",
+#         embeddings=te3_small
+#     )
+#     retriever = qdrant_store.as_retriever()
+
+#     global retrieval_augmented_qa_chain
+#     retrieval_augmented_qa_chain = (
+#         {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
+#         | RunnablePassthrough.assign(context=itemgetter("context"))
+#         | chat_prompt
+#         | chat_model
+#     )
+
+#     await cl.Message(content="Ask away!").send()
+
+
 @cl.on_chat_start
 async def on_chat_start():
     qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
     qdrant_store = Qdrant(
         client=qdrant_client,
-        collection_name="kai_test_docs",
+        collection_name=collection_name,
         embeddings=te3_small
     )
-    retriever = qdrant_store.as_retriever()
 
+    res = await cl.AskActionMessage(
+        content="Pick an action!",
+        actions=[
+            cl.Action(name="Question", value="question", label="Ask a question"),
+            cl.Action(name="File", value="file", label="Upload a file"),
+        ],
+    ).send()
+
+    if res and res.get("value") == "file":
+        files = None
+        files = await cl.AskFileMessage(
+            content="Please upload a Text or PDF File file to begin!",
+            accept=["text/plain", "application/pdf"],
+            max_size_mb=2,
+            timeout=180,
+        ).send()
+
+        file = files[0]
+        
+        msg = cl.Message(
+            content=f"Processing `{file.name}`...", disable_human_feedback=True
+        )
+        await msg.send()
+
+        # load the file
+        docs = process_file(file)
+        for i, doc in enumerate(docs):
+            doc.metadata["source"] = f"source_{i}" # TO DO: Add metadata
+            add_to_qdrant(doc, te3_small, qdrant_client, collection_name)
+        print(f"Processing {len(docs)} text chunks")
+
+        # Add to the qdrant_store
+        splits = text_splitter.split_documents(docs)
+        
+        qdrant_store.add_documents(
+            documents=splits
+        )
+
+        msg.content = f"Processing `{file.name}` done. You can now ask questions!"
+        await msg.update()
+    
+    if res and res.get("value") == "question":
+        await cl.Message(content="Ask away!").send()
+    
+    retriever = qdrant_store.as_retriever()
     global retrieval_augmented_qa_chain
     retrieval_augmented_qa_chain = (
         {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
@@ -46,8 +111,6 @@ async def on_chat_start():
         | chat_prompt
         | chat_model
     )
-
-    await cl.Message(content="Ask away!").send()
 
 @cl.author_rename
 def rename(orig_author: str):
