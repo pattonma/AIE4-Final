@@ -51,7 +51,7 @@ async def on_chat_start():
         files = await cl.AskFileMessage(
             content="Please upload a Text or PDF File file to begin!",
             accept=["text/plain", "application/pdf"],
-            max_size_mb=2,
+            max_size_mb=12,
         ).send()
 
         file = files[0]
@@ -63,14 +63,12 @@ async def on_chat_start():
 
         # load the file
         docs = process_file(file)
-        for i, doc in enumerate(docs):
-            doc.metadata["source"] = f"source_{i}" # TO DO: Add metadata
-            add_to_qdrant(doc, te3_small, qdrant_client, collection_name)
+        splits = text_splitter.split_documents(docs)
+        for i, doc in enumerate(splits):
+            doc.metadata["source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")
 
         # Add to the qdrant_store
-        splits = text_splitter.split_documents(docs)
-        
         qdrant_store.add_documents(
             documents=splits
         )
