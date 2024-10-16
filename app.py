@@ -73,7 +73,6 @@ async def on_chat_start():
             content="Please upload a Text or PDF File file to begin!",
             accept=["text/plain", "application/pdf"],
             max_size_mb=2,
-            timeout=180,
         ).send()
 
         file = files[0]
