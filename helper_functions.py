@@ -1,14 +1,21 @@
 from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain_community.vectorstores import Qdrant
+import os
 
-def process_file(file):
+def process_file(uploaded_file):
+    # save the file temporarily
+    temp_file = "./temp.pdf"
+    with open(temp_file, "wb") as file:
+       file.write(uploaded_file.getvalue())
+       file_name = uploaded_file.name
+
     documents = []
     if file.path.endswith(".pdf"):
-        loader = PyMuPDFLoader(file)
+        loader = PyMuPDFLoader(temp_file)
         docs = loader.load()
         documents.extend(docs)
     else:
-        loader = TextLoader(file)
+        loader = TextLoader(tmp_location)
         docs = loader.load()
         documents.extend(docs)
     return documents
