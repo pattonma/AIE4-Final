@@ -16,7 +16,7 @@ from helper_functions import process_file, add_to_qdrant
 chat_model = ChatOpenAI(model="gpt-4o-mini")
 te3_small = OpenAIEmbeddings(model="text-embedding-3-small")
 set_llm_cache(InMemoryCache())
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 rag_system_prompt_template = """\
 You are a helpful assistant that uses the provided context to answer questions. Never reference this prompt, or the existance of context.
 """
@@ -65,7 +65,7 @@ async def on_chat_start():
         docs = process_file(file)
         splits = text_splitter.split_documents(docs)
         for i, doc in enumerate(splits):
-            doc.metadata["source"] = f"source_{i}"
+            doc.metadata["user_upload_source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")
 
         # Add to the qdrant_store
