@@ -1,8 +1,8 @@
 ---
 title: Aie4 Final
-emoji: 🚀
-colorFrom: purple
-colorTo: purple
+emoji: 📝
+colorFrom: blue
+colorTo: blue
 sdk: docker
 pinned: false
 license: mit
