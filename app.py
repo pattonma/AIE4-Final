@@ -42,14 +42,14 @@ async def on_chat_start():
         content="Pick an action!",
         actions=[
             cl.Action(name="Question", value="question", label="Ask a question"),
-            cl.Action(name="File", value="file", label="Upload a file"),
+            cl.Action(name="File", value="file", label="Upload a file or URL"),
         ],
     ).send()
 
     if res and res.get("value") == "file":
         files = None
         files = await cl.AskFileMessage(
-            content="Please upload a Text or PDF File file to begin!",
+            content="Please upload a URL, Text, PDF file to begin!",
             accept=["text/plain", "application/pdf"],
             max_size_mb=12,
         ).send()
