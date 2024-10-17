@@ -65,7 +65,7 @@ custom_css = "/public/stylesheet.css"
     paper = "#FFFFFF"
 
     [UI.theme.light.primary]
-        main = "#279af1"
+        main = "#5461cb"
         dark = "#5461cb"
         light = "#FFE7EB"
 
