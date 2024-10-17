@@ -1,4 +1,8 @@
-[UI]
-# ...
-# This can either be a css file in your `public` dir or a URL
-custom_css = '/public/stylesheet.css'
+[UI.theme.light]
+    background = "#110061"
+    paper = "#FFFFFF"
+
+    [UI.theme.light.primary]
+        main = "#110061"
+        dark = "#180039"
+        light = "#FFE7EB"
