@@ -9,7 +9,7 @@ def process_file(file_or_url):
         docs = loader.load()
         documents.extend(docs)
     # save the file temporarily
-    temp_file = "./temp/"+file_or_url.path
+    temp_file = "./"+file_or_url.path
     with open(temp_file, "wb") as file:
        file.write(file_or_url.content)
        file_name = file_or_url.name
