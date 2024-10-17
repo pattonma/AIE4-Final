@@ -4,7 +4,7 @@ import os
 
 def process_file(uploaded_file):
     # save the file temporarily
-    temp_file = "./temp.pdf"
+    temp_file = "./temp/"+uploaded_file.path
     with open(temp_file, "wb") as file:
        file.write(uploaded_file.content)
        file_name = uploaded_file.name
@@ -15,7 +15,7 @@ def process_file(uploaded_file):
         docs = loader.load()
         documents.extend(docs)
     else:
-        loader = TextLoader(tmp_location)
+        loader = TextLoader(temp_file)
         docs = loader.load()
         documents.extend(docs)
     return documents
