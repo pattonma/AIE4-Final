@@ -1,16 +1,21 @@
-from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
+from langchain_community.document_loaders import PyMuPDFLoader, TextLoader, WebBaseLoader
 from langchain_community.vectorstores import Qdrant
 import os
 
-def process_file(uploaded_file):
+def process_file(file_or_url):
+    if isinstance(file_or_url, str) and file_or_url.startswith(('http://', 'https://')):
+        # Handle URL
+        loader = WebBaseLoader(file_or_url)
+        docs = loader.load()
+        documents.extend(docs)
     # save the file temporarily
-    temp_file = "./temp/"+uploaded_file.path
+    temp_file = "./temp/"+file_or_url.path
     with open(temp_file, "wb") as file:
-       file.write(uploaded_file.content)
-       file_name = uploaded_file.name
+       file.write(file_or_url.content)
+       file_name = file_or_url.name
 
     documents = []
-    if uploaded_file.path.endswith(".pdf"):
+    if file_or_url.path.endswith(".pdf"):
         loader = PyMuPDFLoader(temp_file)
         docs = loader.load()
         documents.extend(docs)
@@ -22,7 +27,6 @@ def process_file(uploaded_file):
 
 
 def add_to_qdrant(documents, embeddings, qdrant_client, collection_name):
-    
     Qdrant.from_documents(
         documents,
         embeddings,
