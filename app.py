@@ -85,8 +85,8 @@ async def on_chat_start():
         await cl.Message(content="Ask away!").send()
     
     # Retrieve the writing style guide
-    writing_style_docs = qdrant_store.similarity_search("CoExperiences Writing Style Guide V1 (2024)", k=1)
-    writing_style_guide = writing_style_docs[0].page_content if writing_style_docs else "No specific writing style guide found."
+    writing_style_docs = qdrant_store.get_by_metadata({"source": "./CoExperiences Writing Style Guide V1 (2024).pdf"})
+    writing_style_guide = "\n".join([doc.page_content for doc in writing_style_docs])
 
     retriever = qdrant_store.as_retriever()
     global retrieval_augmented_qa_chain
