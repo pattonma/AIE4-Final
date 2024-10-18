@@ -1,4 +1,4 @@
-from langchain_community.document_loaders import PyMuPDF, TextLoader, UnstructuredURLLoader
+from langchain_community.document_loaders import PyMuPDFLoader, TextLoader, UnstructuredURLLoader
 from langchain_community.vectorstores import Qdrant
 import os
 import requests
@@ -25,7 +25,7 @@ def load_documents_from_url(url):
         # Check if it's a PDF
         if url.endswith(".pdf"):
             try:
-                loader = PyMuPDF(url)
+                loader = PyMuPDFLoader(url)
                 return loader.load()
             except Exception as e:
                 print(f"Error loading PDF from {url}: {e}")
