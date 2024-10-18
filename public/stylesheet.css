@@ -37,3 +37,7 @@ indigo: #5461cb
 #new-chat-button {
   background-color: #279af1 !important
 }
+
+#welcome-screen {
+  color: #5461cb !important;
+}
