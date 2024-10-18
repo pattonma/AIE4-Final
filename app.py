@@ -84,17 +84,19 @@ async def on_chat_start():
     if res and res.get("value") == "question":
         await cl.Message(content="Ask away!").send()
     
-    # Retrieve the writing style guide
-    writing_style_docs = qdrant_store.get_by_metadata({"source": "./CoExperiences Writing Style Guide V1 (2024).pdf"})
-    writing_style_guide = "\n".join([doc.page_content for doc in writing_style_docs])
-
+    # Load the style guide from the local file system
+    style_guide_path = "./public/CoExperiences Writing Style Guide V1 (2024).pdf"
+    loader = PyPDFLoader(style_guide_path)
+    style_guide_docs = loader.load()
+    style_guide_text = "\n".join([doc.page_content for doc in style_guide_docs])
+    
     retriever = qdrant_store.as_retriever()
     global retrieval_augmented_qa_chain
     retrieval_augmented_qa_chain = (
         {
             "context": itemgetter("question") | retriever, 
             "question": itemgetter("question"),
-            "writing_style_guide": lambda _: writing_style_guide
+            "writing_style_guide": lambda _: style_guide_text
         }
         | RunnablePassthrough.assign(context=itemgetter("context"))
         | chat_prompt
