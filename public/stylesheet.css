@@ -1,3 +1,18 @@
+/* 
+light blue: #74c6f7
+medium blue: #279af1
+indigo: #5461cb
+
+*/
+
 .message {
   background-color: #74c6f7 !important
+
+
+.MuiBox-root p {
+  color: #279af1 !important;
+}
+
+.MuiBox-root p:first-child {
+  color: #5461cb !important;
 }
