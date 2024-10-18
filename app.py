@@ -8,7 +8,7 @@ from langchain_core.caches import InMemoryCache
 from operator import itemgetter
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from langchain_qdrant import QdrantVectorStore, Qdrant
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyMuPDF
 import uuid
 import chainlit as cl
 import os
@@ -50,7 +50,7 @@ async def on_chat_start():
 
     # Load the style guide from the local file system
     style_guide_path = "./public/CoExperiences Writing Style Guide V1 (2024).pdf"
-    loader = PyPDFLoader(style_guide_path)
+    loader = PyMuPDF(style_guide_path)
     style_guide_docs = loader.load()
     style_guide_text = "\n".join([doc.page_content for doc in style_guide_docs])
     
