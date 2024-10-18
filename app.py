@@ -72,7 +72,12 @@ def rename(orig_author: str):
     return "Marketing Assistant"
 
 @cl.on_message
-async def main(message: cl.Message, message_type: str):
+async def main(message: cl.Message):
+    if message.content.startswith("http://") or message.content.startswith("https://"):
+        message_type = "url"
+    else:
+        message_type = "question"
+    
     if message_type == "url":
         # load the file
         docs = load_documents_from_url(message.content)
