@@ -5,9 +5,11 @@ indigo: #5461cb
 
 */
 
-.MuiPaper-root header {
-  background-color: #5461cb !important
+.MuiToolbar-root {
+  background-color: #5461cb !important;
+  border-color: #5461cb !important;
 }
+
 .message {
   background-color: #74c6f7 !important
 }
