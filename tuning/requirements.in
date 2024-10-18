@@ -1,0 +1,14 @@
+langchain_openai
+langchain_huggingface
+langchain_core==0.2.38
+langchain
+langchain_community
+langchain-text-splitters
+faiss-cpu
+unstructured==0.15.7
+python-pptx==1.0.2
+nltk==3.9.1
+pyarrow
+sentence_transformers
+datasets
+ragas

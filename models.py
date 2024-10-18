@@ -5,9 +5,11 @@ from langchain.callbacks.tracers import LangChainTracer
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore, Qdrant
+from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from qdrant_client import QdrantClient
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_cohere import CohereRerank
 import constants
 import os
 
@@ -66,10 +68,8 @@ gpt4o_mini = ChatOpenAI(
 )
 
 basic_embeddings = HuggingFaceEmbeddings(model_name="snowflake/snowflake-arctic-embed-l")
-#hkunlp_instructor_large = HuggingFaceInstructEmbeddings(
-#    model_name = "hkunlp/instructor-large",
-#    query_instruction="Represent the query for retrieval: "
-#)
+
+tuned_embeddings = HuggingFaceEmbeddings(model_name="CoExperiences/snowflake-l-marketing-tuned")
 
 te3_small = OpenAIEmbeddings(api_key=constants.OPENAI_API_KEY, model="text-embedding-3-small")
 
@@ -78,9 +78,28 @@ semanticChunker = SemanticChunker(
     breakpoint_threshold_type="percentile"
 )
 
+semanticChunker_tuned = SemanticChunker(
+    tuned_embeddings,
+    breakpoint_threshold_type="percentile",
+    breakpoint_threshold_amount=85
+)
+
 RCTS = RecursiveCharacterTextSplitter(
     # Set a really small chunk size, just to show.
     chunk_size=500,
     chunk_overlap=25,
     length_function=len,
+)
+
+semantic_tuned_Qdrant_vs = QdrantVectorStore(
+    client=qdrant_client,
+    collection_name="docs_from_ripped_urls_semantic_tuned",
+    embedding=tuned_embeddings
+)
+semantic_tuned_retriever = semantic_tuned_Qdrant_vs.as_retriever(search_kwargs={"k" : 10})
+
+#compression
+compressor = CohereRerank(model="rerank-english-v3.0")
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor, base_retriever=semantic_tuned_retriever
 )

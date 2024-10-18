@@ -6,12 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader, UnstructuredURLLoa
 from qdrant_client.http.models import VectorParams
 import pymupdf
 import requests
-
-#qdrant = QdrantVectorStore.from_existing_collection(
-#    embedding=models.basic_embeddings,
-#    collection_name="kai_test_documents",
-#    url=constants.QDRANT_ENDPOINT,
-#)
+from transformers import AutoTokenizer
 
 def extract_links_from_pdf(pdf_path):
     links = []
@@ -78,26 +73,22 @@ for link in unique_links:
 
 
 #print(len(documents))
-semantic_split_docs = models.semanticChunker.split_documents(documents)
-RCTS_split_docs = models.RCTS.split_documents(documents)
+#semantic_split_docs = models.semanticChunker.split_documents(documents)
+semantic_tuned_split_docs = models.semanticChunker_tuned.split_documents(documents)
+#RCTS_split_docs = models.RCTS.split_documents(documents)
+#print(len(semantic_split_docs))
+print(len(semantic_tuned_split_docs))
+#tokenizer = models.tuned_embeddings.client.tokenizer
+#
+#token_sizes = [len(tokenizer.encode(chunk)) for chunk in semantic_tuned_split_docs]
 
-
-#for file in filepaths:
-#    loader = PyPDFLoader(file)
-#    documents = loader.load()
-#    for doc in documents:
-#        doc.metadata = {
-#            "source": file,
-#            "tag": "employee" if "employee" in file.lower() else "employer"
-#        }
-#    all_documents.extend(documents) 
-
-#chunk them
-#semantic_split_docs = models.semanticChunker.split_documents(all_documents)
-
-
+# Display the token sizes
+#for idx, size in enumerate(token_sizes):
+#    print(f"Chunk {idx + 1}: {size} tokens")
+#
+#exit()
 #add them to the existing qdrant client
-collection_name = "docs_from_ripped_urls_recursive"
+collection_name = "docs_from_ripped_urls_semantic_tuned"
 
 collections = models.qdrant_client.get_collections()
 collection_names = [collection.name for collection in collections.collections]
@@ -105,16 +96,16 @@ collection_names = [collection.name for collection in collections.collections]
 if collection_name not in collection_names:
     models.qdrant_client.create_collection(
         collection_name=collection_name,
-        vectors_config=VectorParams(size=1536, distance="Cosine") 
+        vectors_config=VectorParams(size=1024, distance="Cosine") 
     )
 
 qdrant_vector_store = QdrantVectorStore(
     client=models.qdrant_client,
     collection_name=collection_name,
-    embedding=models.te3_small
+    embedding=models.tuned_embeddings
 )
 
-qdrant_vector_store.add_documents(RCTS_split_docs)
+qdrant_vector_store.add_documents(semantic_tuned_split_docs)
 
 
 
