@@ -10,6 +10,10 @@ indigo: #5461cb
   border-color: #5461cb !important;
 }
 
+.MuiToolbar-root .MuiButtonBase-root {
+  color: #ffffff !important
+}
+
 .message {
   background-color: #74c6f7 !important
 }
@@ -26,8 +30,8 @@ indigo: #5461cb
   background-color: #279af1 !important
 }
 
-.MuiToolbar-root .MuiButtonBase-root {
-  color: #ffffff !important
+.markdown-body p {
+  color: #279af1 !important;
 }
 
 #new-chat-button {
