@@ -55,7 +55,6 @@ def load_documents_from_url(url):
     except Exception as e:
         print(f"General error loading from {url}: {e}")
         return None
-  
 
 def add_to_qdrant(documents, embeddings, qdrant_client, collection_name):
     Qdrant.from_documents(
