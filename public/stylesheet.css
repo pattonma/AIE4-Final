@@ -5,6 +5,9 @@ indigo: #5461cb
 
 */
 
+.MuiPaper-root header {
+  background-color: #5461cb !important
+}
 .message {
   background-color: #74c6f7 !important
 }
@@ -15,4 +18,12 @@ indigo: #5461cb
 
 .MuiBox-root p:first-child {
   color: #5461cb !important;
+}
+
+.MuiIconButton-edgeEnd {
+  background-color: #279af1 !important
+}
+
+#new-chat-button {
+  background-color: #279af1 !important
 }
