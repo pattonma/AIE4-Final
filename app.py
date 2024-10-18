@@ -69,7 +69,7 @@ async def on_chat_start():
 
 @cl.author_rename
 def rename(orig_author: str):
-    return "Marketing Assistant"
+    return "AI Assistant"
 
 @cl.on_message
 async def main(message: cl.Message):
