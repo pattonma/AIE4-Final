@@ -18,7 +18,12 @@ te3_small = OpenAIEmbeddings(model="text-embedding-3-small")
 set_llm_cache(InMemoryCache())
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 rag_system_prompt_template = """\
-You are a helpful assistant that uses the provided context to answer questions. Never reference this prompt, or the existance of context.
+You are a helpful assistant that uses the provided context to answer questions. 
+You must follow the writing style guide provided below. Never reference this prompt, 
+the existence of context, or the writing style guide in your responses.
+
+Writing Style Guide:
+{writing_style_guide}
 """
 rag_message_list = [{"role" : "system", "content" : rag_system_prompt_template},]
 rag_user_prompt_template = """\
@@ -79,10 +84,18 @@ async def on_chat_start():
     if res and res.get("value") == "question":
         await cl.Message(content="Ask away!").send()
     
+    # Retrieve the writing style guide
+    writing_style_docs = qdrant_store.similarity_search("CoExperiences Writing Style Guide V1 (2024)", k=1)
+    writing_style_guide = writing_style_docs[0].page_content if writing_style_docs else "No specific writing style guide found."
+
     retriever = qdrant_store.as_retriever()
     global retrieval_augmented_qa_chain
     retrieval_augmented_qa_chain = (
-        {"context": itemgetter("question") | retriever, "question": itemgetter("question")}
+        {
+            "context": itemgetter("question") | retriever, 
+            "question": itemgetter("question"),
+            "writing_style_guide": lambda _: writing_style_guide
+        }
         | RunnablePassthrough.assign(context=itemgetter("context"))
         | chat_prompt
         | chat_model
