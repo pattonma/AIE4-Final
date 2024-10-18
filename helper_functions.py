@@ -11,7 +11,7 @@ def process_file(file):
 
     documents = []
     if file.path.endswith(".pdf"):
-        loader = PyPDFLoader(temp_file)
+        loader = PyMuPDF(temp_file)
         docs = loader.load()
         documents.extend(docs)
     else:
