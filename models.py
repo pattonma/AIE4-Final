@@ -20,7 +20,9 @@ os.environ["LANGCHAIN_ENDPOINT"] = constants.LANGCHAIN_ENDPOINT
 tracer = LangChainTracer()
 callback_manager = CallbackManager([tracer])
 
-qdrant_client = QdrantClient(url=constants.QDRANT_ENDPOINT, api_key=constants.QDRANT_API_KEY)
+########################
+### Chat Models      ###
+########################
 
 opus3 = ChatAnthropic(
     api_key=constants.ANTRHOPIC_API_KEY, 
@@ -67,11 +69,19 @@ gpt4o_mini = ChatOpenAI(
     callbacks=callback_manager
 )
 
+########################
+### Embedding Models ###
+########################
+
 basic_embeddings = HuggingFaceEmbeddings(model_name="snowflake/snowflake-arctic-embed-l")
 
 tuned_embeddings = HuggingFaceEmbeddings(model_name="CoExperiences/snowflake-l-marketing-tuned")
 
 te3_small = OpenAIEmbeddings(api_key=constants.OPENAI_API_KEY, model="text-embedding-3-small")
+
+#######################
+### Text Splitters  ###
+#######################
 
 semanticChunker = SemanticChunker(
     te3_small,
@@ -91,14 +101,35 @@ RCTS = RecursiveCharacterTextSplitter(
     length_function=len,
 )
 
+#######################
+###  Vector Stores  ###
+#######################
+
+qdrant_client = QdrantClient(url=constants.QDRANT_ENDPOINT, api_key=constants.QDRANT_API_KEY)
+
+semantic_Qdrant_vs = QdrantVectorStore(
+    client=qdrant_client,
+    collection_name="docs_from_ripped_urls",
+    embedding=te3_small
+)
+
+rcts_Qdrant_vs = QdrantVectorStore(
+    client=qdrant_client,
+    collection_name="docs_from_ripped_urls_recursive",
+    embedding=te3_small
+)
+
 semantic_tuned_Qdrant_vs = QdrantVectorStore(
     client=qdrant_client,
     collection_name="docs_from_ripped_urls_semantic_tuned",
     embedding=tuned_embeddings
 )
+
+#######################
+###  Retrievers     ###
+#######################
 semantic_tuned_retriever = semantic_tuned_Qdrant_vs.as_retriever(search_kwargs={"k" : 10})
 
-#compression
 compressor = CohereRerank(model="rerank-english-v3.0")
 compression_retriever = ContextualCompressionRetriever(
     base_compressor=compressor, base_retriever=semantic_tuned_retriever
