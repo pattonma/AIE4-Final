@@ -26,6 +26,10 @@ indigo: #5461cb
   background-color: #279af1 !important
 }
 
+.MuiButtonBase-root {
+  color: #ffffff !important
+}
+
 #new-chat-button {
   background-color: #279af1 !important
 }
