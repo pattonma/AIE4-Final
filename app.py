@@ -12,7 +12,7 @@ from langchain_community.document_loaders import PyMuPDFLoader
 import uuid
 import chainlit as cl
 import os
-from helper_functions import process_file, add_to_qdrant
+from helper_functions import process_file, load_documents_from_url, add_to_qdrant
 
 chat_model = ChatOpenAI(model="gpt-4o-mini")
 te3_small = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -38,24 +38,86 @@ chat_prompt = ChatPromptTemplate.from_messages([("system", rag_system_prompt_tem
 @cl.on_chat_start
 async def on_chat_start():
     qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
+    global qdrant_store
     qdrant_store = Qdrant(
         client=qdrant_client,
         collection_name="kai_test_docs",
         embeddings=te3_small
     )
 
+    res = await ask_action()
+    await handle_response(res)
+
+    # Load the style guide from the local file system
+    style_guide_path = "./public/CoExperiences Writing Style Guide V1 (2024).pdf"
+    loader = PyMuPDFLoader(style_guide_path)
+    style_guide_docs = loader.load()
+    style_guide_text = "\n".join([doc.page_content for doc in style_guide_docs])
+    
+    retriever = qdrant_store.as_retriever()
+    global retrieval_augmented_qa_chain
+    retrieval_augmented_qa_chain = (
+        {
+            "context": itemgetter("question") | retriever, 
+            "question": itemgetter("question"),
+            "writing_style_guide": lambda _: style_guide_text
+        }
+        | RunnablePassthrough.assign(context=itemgetter("context"))
+        | chat_prompt
+        | chat_model
+    )
+
+@cl.author_rename
+def rename(orig_author: str):
+    return "AI Assistant"
+
+@cl.on_message
+async def main(message: cl.Message):
+    if message.content.startswith("http://") or message.content.startswith("https://"):
+        message_type = "url"
+    else:
+        message_type = "question"
+    
+    if message_type == "url":
+        # load the file
+        docs = load_documents_from_url(message.content)
+        splits = text_splitter.split_documents(docs)
+        for i, doc in enumerate(splits):
+            doc.metadata["user_upload_source"] = f"source_{i}"
+        print(f"Processing {len(docs)} text chunks")
+
+        # Add to the qdrant_store
+        qdrant_store.add_documents(
+            documents=splits
+        )
+
+        await cl.Message(f"Processing `{response.url}` done. You can now ask questions!").send()
+    
+    else:
+        response = retrieval_augmented_qa_chain.invoke({"question": message.content})
+        await cl.Message(content=response.content).send()
+
+    res = await ask_action()
+    await handle_response(res)
+
+
+## Chainlit helper functions
+async def ask_action():
     res = await cl.AskActionMessage(
         content="Pick an action!",
         actions=[
             cl.Action(name="Question", value="question", label="Ask a question"),
-            cl.Action(name="File", value="file", label="Upload a file or URL"),
+            cl.Action(name="File", value="file", label="Upload a file"),
+            cl.Action(name="Url", value="url", label="Upload a URL"),
         ],
     ).send()
+    return res
 
+async def handle_response(res):
     if res and res.get("value") == "file":
         files = None
         files = await cl.AskFileMessage(
-            content="Please upload a URL, Text, PDF file to begin!",
+            content="Please upload a Text or PDF file to begin!",
             accept=["text/plain", "application/pdf"],
             max_size_mb=12,
         ).send()
@@ -82,33 +144,8 @@ async def on_chat_start():
         msg.content = f"Processing `{file.name}` done. You can now ask questions!"
         await msg.update()
     
+    if res and res.get("value") == "url":
+        await cl.Message(content="Submit a url link in the message box below.").send()
+   
     if res and res.get("value") == "question":
         await cl.Message(content="Ask away!").send()
-    
-    # Load the style guide from the local file system
-    style_guide_path = "./public/CoExperiences Writing Style Guide V1 (2024).pdf"
-    loader = PyMuPDFLoader(style_guide_path)
-    style_guide_docs = loader.load()
-    style_guide_text = "\n".join([doc.page_content for doc in style_guide_docs])
-    
-    retriever = qdrant_store.as_retriever()
-    global retrieval_augmented_qa_chain
-    retrieval_augmented_qa_chain = (
-        {
-            "context": itemgetter("question") | retriever, 
-            "question": itemgetter("question"),
-            "writing_style_guide": lambda _: style_guide_text
-        }
-        | RunnablePassthrough.assign(context=itemgetter("context"))
-        | chat_prompt
-        | chat_model
-    )
-
-@cl.author_rename
-def rename(orig_author: str):
-    return "AI Assistant"
-
-@cl.on_message
-async def main(message: cl.Message):
-    response = retrieval_augmented_qa_chain.invoke({"question": message.content})
-    await cl.Message(content=response.content).send()
