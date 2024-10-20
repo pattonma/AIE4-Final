@@ -20,7 +20,7 @@ def rename(orig_author: str):
 
 @cl.on_message
 async def main(message: cl.Message):
-    print(message.content)
+    cl.Message(message.content).send()
     if message.content.startswith("http://") or message.content.startswith("https://"):
         message_type = "url"
     else:
