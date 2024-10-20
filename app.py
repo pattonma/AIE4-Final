@@ -84,16 +84,14 @@ async def handle_response(res):
         await msg.send()
 
         # load the file
-        docs = process_file(file)
-        splits = models.semanticChunker_tuned.split_documents(docs)
+        docs = await asyncio.to_thread(process_file, file)
+        splits = await asyncio.to_thread(models.semanticChunker_tuned.split_documents, docs)
         for i, doc in enumerate(splits):
             doc.metadata["user_upload_source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")
 
         # Add to the qdrant_store
-        qdrant_store.add_documents(
-            documents=splits
-        )
+        await asyncio.to_thread(qdrant_store.add_documents, splits)
 
         msg.content = f"Processing `{file.name}` done. You can now ask questions!"
         await msg.update()
