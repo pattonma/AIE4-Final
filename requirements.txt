@@ -40,6 +40,7 @@ langchain-community==0.3.0
 langchain-core==0.3.1
 langchain-openai==0.2.0
 langchain-qdrant==0.1.4
+langchain-anthropic
 langchain-text-splitters==0.3.0
 langgraph
 langsmith==0.1.121
