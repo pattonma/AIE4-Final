@@ -8,32 +8,24 @@ from langchain_core.language_models import BaseLanguageModel
 import os
 import functools
 import requests
+from chainlit.types import AskFileResponse
 
-def process_file(uploaded_file):
-    # Save the file temporarily to process it
-    temp_file_path = f"/tmp/{uploaded_file.name}"
-    
-    with open(temp_file_path, "wb") as temp_file:
-        # Write the uploaded file content to the temporary file
-        temp_file.write(uploaded_file.read())
-    
-    # Determine the file type and load it accordingly
-    if uploaded_file.name.endswith(".pdf"):
+def store_uploaded_file(uploaded_file: AskFileResponse):
+    file_path = f"./tmp/{uploaded_file.name}"
+    open(file_path, "wb").write(uploaded_file.content)
+    return file_path
+
+def process_file(file_path):
+    if file_path.endswith(".pdf"):
         # Load PDF with PyMuPDFLoader
-        loader = PyMuPDFLoader(temp_file_path)
-    elif uploaded_file.name.endswith(".txt"):
+        loader = PyMuPDFLoader(file_path)
+    elif file_path.endswith(".txt"):
         # Load text file with TextLoader
-        loader = TextLoader(temp_file_path)
+        loader = TextLoader(file_path)
     else:
         raise ValueError("Unsupported file format. Only PDF and TXT are supported.")
 
-    # Load documents from the file
-    documents = loader.load()
-
-    # Clean up the temporary file
-    os.remove(temp_file_path)
-
-    return documents
+    return loader.load()
 
 def load_documents_from_url(url):
     try:
