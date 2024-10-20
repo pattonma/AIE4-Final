@@ -17,7 +17,7 @@ def process_file(file):
 
     documents = []
     if file.path.endswith(".pdf"):
-        loader = PyMuPDF(temp_file)
+        loader = PyMuPDFLoader(temp_file)
         docs = loader.load()
         documents.extend(docs)
     else:
@@ -80,7 +80,7 @@ def create_team_agent(llm, tools, system_prompt, agent_name, team_members):
         llm,
         tools,
         f"{system_prompt}\nBelow are files currently in your directory:\n{{current_files}}",
-        team_members
+        #team_members
     )
 
 def create_agent_node(agent, name):
