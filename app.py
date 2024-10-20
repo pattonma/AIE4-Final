@@ -1,5 +1,5 @@
 import chainlit as cl
-from helper_functions import process_file, load_documents_from_url, store_uploaded_file
+from helper_functions import process_file, load_documents_from_url
 import models
 import agents
 import asyncio
@@ -85,8 +85,7 @@ async def handle_response(res):
         await msg.send()
 
         # load the file
-        file_path = store_uploaded_file(file)
-        docs = await asyncio.to_thread(process_file, file_path)
+        docs = await asyncio.to_thread(process_file, file)
         await cl.Message(content="loaded docs").send()
         splits = await asyncio.to_thread(models.semanticChunker_tuned.split_documents, docs)
         await cl.Message(content="split docs").send()

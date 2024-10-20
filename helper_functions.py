@@ -11,14 +11,6 @@ import requests
 import tempfile
 from chainlit.types import AskFileResponse
 
-def store_uploaded_file(uploaded_file: AskFileResponse):
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".pdf") as temp_file:
-        temp_file_path = temp_file.name
-
-    with open(temp_file_path, "wb") as f:
-        f.write(uploaded_file.content)
-    return temp_file_path
-
 def process_file(uploaded_file: AskFileResponse):
     if uploaded_file.endswith(".pdf"):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".pdf") as temp_file:
