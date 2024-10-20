@@ -55,7 +55,7 @@ voice_editor_agent = create_team_agent(
 
 simple_rag_chain = (
         {
-            "context": itemgetter("question") | models.semantic_tuned_retrieverretriever, 
+            "context": itemgetter("question") | models.semantic_tuned_retriever, 
             "question": itemgetter("question"),
             "writing_style_guide": lambda _: prompts.style_guide_text
         }

@@ -28,20 +28,20 @@ callback_manager = CallbackManager([tracer])
 ### Chat Models      ###
 ########################
 
-opus3 = ChatAnthropic(
-    api_key=constants.ANTRHOPIC_API_KEY, 
-    temperature=0, 
-    model='claude-3-opus-20240229',
-    callbacks=callback_manager
-)
-
-sonnet35 = ChatAnthropic(
-    api_key=constants.ANTRHOPIC_API_KEY, 
-    temperature=0, 
-    model='claude-3-5-sonnet-20240620',
-    max_tokens=4096,
-    callbacks=callback_manager
-)
+#opus3 = ChatAnthropic(
+#    api_key=constants.ANTRHOPIC_API_KEY, 
+#    temperature=0, 
+#    model='claude-3-opus-20240229',
+#    callbacks=callback_manager
+#)
+#
+#sonnet35 = ChatAnthropic(
+#    api_key=constants.ANTRHOPIC_API_KEY, 
+#    temperature=0, 
+#    model='claude-3-5-sonnet-20240620',
+#    max_tokens=4096,
+#    callbacks=callback_manager
+#)
 
 gpt4 = ChatOpenAI(
     model="gpt-4",
@@ -77,20 +77,20 @@ gpt4o_mini = ChatOpenAI(
 ### Embedding Models ###
 ########################
 
-basic_embeddings = HuggingFaceEmbeddings(model_name="snowflake/snowflake-arctic-embed-l")
+#basic_embeddings = HuggingFaceEmbeddings(model_name="snowflake/snowflake-arctic-embed-l")
 
 tuned_embeddings = HuggingFaceEmbeddings(model_name="CoExperiences/snowflake-l-marketing-tuned")
 
-te3_small = OpenAIEmbeddings(api_key=constants.OPENAI_API_KEY, model="text-embedding-3-small")
+#te3_small = OpenAIEmbeddings(api_key=constants.OPENAI_API_KEY, model="text-embedding-3-small")
 
 #######################
 ### Text Splitters  ###
 #######################
 
-semanticChunker = SemanticChunker(
-    te3_small,
-    breakpoint_threshold_type="percentile"
-)
+#semanticChunker = SemanticChunker(
+#    te3_small,
+#    breakpoint_threshold_type="percentile"
+#)
 
 semanticChunker_tuned = SemanticChunker(
     tuned_embeddings,
@@ -98,12 +98,12 @@ semanticChunker_tuned = SemanticChunker(
     breakpoint_threshold_amount=85
 )
 
-RCTS = RecursiveCharacterTextSplitter(
-    # Set a really small chunk size, just to show.
-    chunk_size=500,
-    chunk_overlap=25,
-    length_function=len,
-)
+#RCTS = RecursiveCharacterTextSplitter(
+#    # Set a really small chunk size, just to show.
+#    chunk_size=500,
+#    chunk_overlap=25,
+#    length_function=len,
+#)
 
 #######################
 ###  Vector Stores  ###
@@ -111,17 +111,17 @@ RCTS = RecursiveCharacterTextSplitter(
 
 qdrant_client = QdrantClient(url=constants.QDRANT_ENDPOINT, api_key=constants.QDRANT_API_KEY)
 
-semantic_Qdrant_vs = QdrantVectorStore(
-    client=qdrant_client,
-    collection_name="docs_from_ripped_urls",
-    embedding=te3_small
-)
-
-rcts_Qdrant_vs = QdrantVectorStore(
-    client=qdrant_client,
-    collection_name="docs_from_ripped_urls_recursive",
-    embedding=te3_small
-)
+#semantic_Qdrant_vs = QdrantVectorStore(
+#    client=qdrant_client,
+#    collection_name="docs_from_ripped_urls",
+#    embedding=te3_small
+#)
+#
+#rcts_Qdrant_vs = QdrantVectorStore(
+#    client=qdrant_client,
+#    collection_name="docs_from_ripped_urls_recursive",
+#    embedding=te3_small
+#)
 
 semantic_tuned_Qdrant_vs = QdrantVectorStore(
     client=qdrant_client,
