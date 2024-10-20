@@ -14,17 +14,13 @@ def process_file(file):
     temp_file = "./"+file.path
     with open(temp_file, "wb") as file:
        file.write(file.content)
-
-    documents = []
+       
     if file.path.endswith(".pdf"):
         loader = PyMuPDFLoader(temp_file)
-        docs = loader.load()
-        documents.extend(docs)
+        return loader.load()
     else:
         loader = TextLoader(temp_file)
-        docs = loader.load()
-        documents.extend(docs)
-    return documents
+        return loader.load()
 
 def load_documents_from_url(url):
     try:

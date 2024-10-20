@@ -21,6 +21,7 @@ def rename(orig_author: str):
 
 @cl.on_message
 async def main(message: cl.Message):
+    await cl.Message(f"Processing `{message.content}`", disable_human_feedback=True)
     if message.content.startswith("http://") or message.content.startswith("https://"):
         message_type = "url"
     else:
@@ -43,7 +44,7 @@ async def main(message: cl.Message):
             await asyncio.to_thread(qdrant_store.add_documents, splits)
 
             await cl.Message(f"Processing `{message.content}` done. You can now ask questions!").send()
-
+            
         except Exception as e:
             await cl.Message(f"Error processing the document: {e}").send()
     else:
@@ -85,13 +86,16 @@ async def handle_response(res):
 
         # load the file
         docs = await asyncio.to_thread(process_file, file)
+        await cl.Message(content="loaded docs").send()
         splits = await asyncio.to_thread(models.semanticChunker_tuned.split_documents, docs)
+        await cl.Message(content="split docs").send()
         for i, doc in enumerate(splits):
             doc.metadata["user_upload_source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")
 
         # Add to the qdrant_store
         await asyncio.to_thread(qdrant_store.add_documents, splits)
+        await cl.Message(content="added to vs").send()
 
         msg.content = f"Processing `{file.name}` done. You can now ask questions!"
         await msg.update()
