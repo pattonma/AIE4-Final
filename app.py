@@ -28,12 +28,16 @@ async def main(message: cl.Message):
     else:
         message_type = "question"
     
+    await cl.Message(
+        content=f"message_type: {message_type}",
+    ).send()
+
     if message_type == "url":
         # load the file
         docs = load_documents_from_url(message.content)
-        cl.Message("loaded docs").send()
+        await cl.Message(content="loaded docs").send()
         splits = models.semanticChunker_tuned.split_documents(docs)
-        cl.Message("split docs").send()
+        await cl.Message(content="split docs").send()
         for i, doc in enumerate(splits):
             doc.metadata["user_upload_source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")
