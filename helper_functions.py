@@ -9,18 +9,31 @@ import os
 import functools
 import requests
 
-def process_file(file):
-    # save the file temporarily
-    temp_file = "./"+file.path
-    with open(temp_file, "wb") as file:
-       file.write(file.content)
-       
-    if file.path.endswith(".pdf"):
-        loader = PyMuPDFLoader(temp_file)
-        return loader.load()
+def process_file(uploaded_file):
+    # Save the file temporarily to process it
+    temp_file_path = f"/tmp/{uploaded_file.name}"
+    
+    with open(temp_file_path, "wb") as temp_file:
+        # Write the uploaded file content to the temporary file
+        temp_file.write(uploaded_file.read())
+    
+    # Determine the file type and load it accordingly
+    if uploaded_file.name.endswith(".pdf"):
+        # Load PDF with PyMuPDFLoader
+        loader = PyMuPDFLoader(temp_file_path)
+    elif uploaded_file.name.endswith(".txt"):
+        # Load text file with TextLoader
+        loader = TextLoader(temp_file_path)
     else:
-        loader = TextLoader(temp_file)
-        return loader.load()
+        raise ValueError("Unsupported file format. Only PDF and TXT are supported.")
+
+    # Load documents from the file
+    documents = loader.load()
+
+    # Clean up the temporary file
+    os.remove(temp_file_path)
+
+    return documents
 
 def load_documents_from_url(url):
     try:
