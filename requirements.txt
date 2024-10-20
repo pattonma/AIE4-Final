@@ -642,6 +642,7 @@ zipp==3.20.2
     #   importlib-metadata
 unstructured
 asyncio
+tempfile
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

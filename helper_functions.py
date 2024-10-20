@@ -1,6 +1,6 @@
 from typing import List
 from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain_community.document_loaders import PyMuPDFLoader, TextLoader, UnstructuredURLLoader, WebBaseLoader
+from langchain_community.document_loaders import PyMuPDFLoader, TextFileLoader, UnstructuredURLLoader, WebBaseLoader
 from langchain_community.vectorstores import Qdrant
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -8,20 +8,34 @@ from langchain_core.language_models import BaseLanguageModel
 import os
 import functools
 import requests
+import tempfile
 from chainlit.types import AskFileResponse
 
 def store_uploaded_file(uploaded_file: AskFileResponse):
-    file_path = f"./tmp/{uploaded_file.name}"
-    open(file_path, "wb").write(uploaded_file.content)
-    return file_path
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".pdf") as temp_file:
+        temp_file_path = temp_file.name
 
-def process_file(file_path):
-    if file_path.endswith(".pdf"):
+    with open(temp_file_path, "wb") as f:
+        f.write(uploaded_file.content)
+    return temp_file_path
+
+def process_file(uploaded_file: AskFileResponse):
+    if uploaded_file.name.endswith(".pdf"):
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".pdf") as temp_file:
+            temp_file_path = temp_file.name
+
+        with open(temp_file_path, "wb") as f:
+            f.write(uploaded_file.content)
         # Load PDF with PyMuPDFLoader
-        loader = PyMuPDFLoader(file_path)
-    elif file_path.endswith(".txt"):
+        loader = PyMuPDFLoader(temp_file_path)
+    elif uploaded_file.name.endswith(".txt"):
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as temp_file:
+            temp_file_path = temp_file.name
+
+        with open(temp_file_path, "wb") as f:
+            f.write(uploaded_file.content)
         # Load text file with TextLoader
-        loader = TextLoader(file_path)
+        loader = TextFileLoader(temp_file_path)
     else:
         raise ValueError("Unsupported file format. Only PDF and TXT are supported.")
 
