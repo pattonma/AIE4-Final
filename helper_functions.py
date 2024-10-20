@@ -1,6 +1,6 @@
 from typing import List
 from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain_community.document_loaders import PyMuPDFLoader, TextFileLoader, UnstructuredURLLoader, WebBaseLoader
+from langchain_community.document_loaders import PyMuPDFLoader, TextLoader, UnstructuredURLLoader, WebBaseLoader
 from langchain_community.vectorstores import Qdrant
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -35,7 +35,7 @@ def process_file(uploaded_file: AskFileResponse):
         with open(temp_file_path, "wb") as f:
             f.write(uploaded_file.content)
         # Load text file with TextLoader
-        loader = TextFileLoader(temp_file_path)
+        loader = TextLoader(temp_file_path)
     else:
         raise ValueError("Unsupported file format. Only PDF and TXT are supported.")
 
