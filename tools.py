@@ -1,7 +1,20 @@
+from pathlib import Path
+from typing import Annotated, Optional
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.tools import tool
+from agents import simple_rag_chain
+
+WORKING_DIRECTORY = Path("/tmp/content/data")
+WORKING_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 tavily_tool = TavilySearchResults(max_results=5)
+
+@tool
+def retrieve_information(
+    query: Annotated[str, "query to ask the retrieve information tool"]
+    ):
+  """Use Retrieval Augmented Generation to retrieve information about the 'Extending Llama-3’s Context Ten-Fold Overnight' paper."""
+  return simple_rag_chain.invoke({"question" : query})
 
 @tool
 def create_outline(points: List[str], file_name: str) -> str:

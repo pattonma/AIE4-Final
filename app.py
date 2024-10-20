@@ -1,71 +1,18 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from qdrant_client import QdrantClient
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.globals import set_llm_cache
-from langchain_openai import ChatOpenAI
-from langchain_core.caches import InMemoryCache
-from operator import itemgetter
-from langchain_core.runnables.passthrough import RunnablePassthrough
-from langchain_qdrant import QdrantVectorStore, Qdrant
-from langchain_community.document_loaders import PyMuPDFLoader
-import uuid
 import chainlit as cl
-import os
 from helper_functions import process_file, load_documents_from_url, add_to_qdrant
-
-chat_model = ChatOpenAI(model="gpt-4o-mini")
-te3_small = OpenAIEmbeddings(model="text-embedding-3-small")
-set_llm_cache(InMemoryCache())
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-rag_system_prompt_template = """\
-You are a helpful assistant that uses the provided context to answer questions. 
-You must follow the writing style guide provided below. Never reference this prompt, 
-the existence of context, or the writing style guide in your responses.
-
-Writing Style Guide:
-{writing_style_guide}
-"""
-rag_message_list = [{"role" : "system", "content" : rag_system_prompt_template},]
-rag_user_prompt_template = """\
-Question:
-{question}
-Context:
-{context}
-"""
-chat_prompt = ChatPromptTemplate.from_messages([("system", rag_system_prompt_template), ("human", rag_user_prompt_template)])
+import models
+import agents
 
 @cl.on_chat_start
 async def on_chat_start():
-    qdrant_client = QdrantClient(url=os.environ["QDRANT_ENDPOINT"], api_key=os.environ["QDRANT_API_KEY"])
     global qdrant_store
-    qdrant_store = Qdrant(
-        client=qdrant_client,
-        collection_name="kai_test_docs",
-        embeddings=te3_small
-    )
+    qdrant_store = models.semantic_tuned_Qdrant_vs
+
+    global retrieval_augmented_qa_chain
+    retrieval_augmented_qa_chain = agents.simple_rag_chain
 
     res = await ask_action()
     await handle_response(res)
-
-    # Load the style guide from the local file system
-    style_guide_path = "./public/CoExperiences Writing Style Guide V1 (2024).pdf"
-    loader = PyMuPDFLoader(style_guide_path)
-    style_guide_docs = loader.load()
-    style_guide_text = "\n".join([doc.page_content for doc in style_guide_docs])
-    
-    retriever = qdrant_store.as_retriever()
-    global retrieval_augmented_qa_chain
-    retrieval_augmented_qa_chain = (
-        {
-            "context": itemgetter("question") | retriever, 
-            "question": itemgetter("question"),
-            "writing_style_guide": lambda _: style_guide_text
-        }
-        | RunnablePassthrough.assign(context=itemgetter("context"))
-        | chat_prompt
-        | chat_model
-    )
 
 @cl.author_rename
 def rename(orig_author: str):
@@ -73,6 +20,7 @@ def rename(orig_author: str):
 
 @cl.on_message
 async def main(message: cl.Message):
+    print(message.content)
     if message.content.startswith("http://") or message.content.startswith("https://"):
         message_type = "url"
     else:
@@ -81,7 +29,9 @@ async def main(message: cl.Message):
     if message_type == "url":
         # load the file
         docs = load_documents_from_url(message.content)
-        splits = text_splitter.split_documents(docs)
+        cl.Message("loaded docs").send()
+        splits = models.semanticChunker_tuned.split_documents(docs)
+        cl.Message("split docs").send()
         for i, doc in enumerate(splits):
             doc.metadata["user_upload_source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")
@@ -131,7 +81,7 @@ async def handle_response(res):
 
         # load the file
         docs = process_file(file)
-        splits = text_splitter.split_documents(docs)
+        splits = models.semanticChunker_tuned.split_documents(docs)
         for i, doc in enumerate(splits):
             doc.metadata["user_upload_source"] = f"source_{i}"
         print(f"Processing {len(docs)} text chunks")

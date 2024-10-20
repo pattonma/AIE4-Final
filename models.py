@@ -10,12 +10,16 @@ from langchain.retrievers.contextual_compression import ContextualCompressionRet
 from qdrant_client import QdrantClient
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_cohere import CohereRerank
+from langchain_core.globals import set_llm_cache
+from langchain_core.caches import InMemoryCache
 import constants
 import os
 
 os.environ["LANGCHAIN_API_KEY"] = constants.LANGCHAIN_API_KEY
 os.environ["LANGCHAIN_TRACING_V2"] = str(constants.LANGCHAIN_TRACING_V2)
 os.environ["LANGCHAIN_ENDPOINT"] = constants.LANGCHAIN_ENDPOINT
+
+set_llm_cache(InMemoryCache())
 
 tracer = LangChainTracer()
 callback_manager = CallbackManager([tracer])
