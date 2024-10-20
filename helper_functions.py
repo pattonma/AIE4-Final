@@ -12,7 +12,7 @@ import tempfile
 from chainlit.types import AskFileResponse
 
 def process_file(uploaded_file: AskFileResponse):
-    if uploaded_file.endswith(".pdf"):
+    if uploaded_file.name.endswith(".pdf"):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".pdf") as temp_file:
             temp_file_path = temp_file.name
 
@@ -20,7 +20,7 @@ def process_file(uploaded_file: AskFileResponse):
             f.write(uploaded_file.content)
         # Load PDF with PyMuPDFLoader
         loader = PyMuPDFLoader(temp_file_path)
-    elif uploaded_file.endswith(".txt"):
+    elif uploaded_file.name.endswith(".txt"):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as temp_file:
             temp_file_path = temp_file.name
 
