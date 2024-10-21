@@ -25,24 +25,11 @@ qdrant_research_chain = (
     )
 
 # Web Search Agent Pieces
-tavily_tool = TavilySearchResults(max_results=5)
-web_search_chain = (
-    {
-        "topic": itemgetter("topic"),
-        "qdrant_results": itemgetter("qdrant_results"),
-    }
-    | prompts.search_query_prompt
-    | models.gpt4o_mini 
-    | StrOutputParser()
-    | tavily_tool
-    | {
-        "topic": itemgetter("topic"),
-        "qdrant_results": itemgetter("qdrant_results"),
-        "search_results": RunnablePassthrough()
-    }
-    | prompts.summarize_prompt
-    | models.gpt4o_mini 
-    | StrOutputParser()
+tavily_tool = TavilySearchResults(max_results=3)
+query_chain = ( prompts.search_query_prompt | models.gpt4o_mini | StrOutputParser() )
+tavily_simple = ({"tav_results": tavily_tool} | prompts.tavily_prompt | models.gpt4o_mini | StrOutputParser())
+tavily_chain = (
+    {"query": query_chain} | tavily_simple
 )
 
 def query_qdrant(state: State) -> State:
@@ -65,7 +52,7 @@ def web_search(state: State) -> State:
     qdrant_results = state["research_data"].get("qdrant_results", "No previous results available.")
     
     # Run the web search chain
-    result = web_search_chain.invoke({
+    result = tavily_chain.invoke({
         "topic": topic,
         "qdrant_results": qdrant_results
     })

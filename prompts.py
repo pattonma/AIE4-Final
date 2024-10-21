@@ -48,18 +48,16 @@ search_query_prompt = ChatPromptTemplate.from_template(
     """
 )
 
-# Create a prompt for summarizing the search results
-summarize_prompt = ChatPromptTemplate.from_template(
-    """Summarize the following search results, focusing on information that is complementary to what we already know from our database. Include sources for each piece of information:
+tavily_prompt = ChatPromptTemplate.from_template(
+    """Summarize the query results into the following format:
 
-    Topic: {topic}
+    Query results: {tav_results}
     
-    Information from our database:
-    {qdrant_results}
-    
-    Search results:
-    {search_results}
-    
-    Complementary summary with sources:
+    Output: 
+    Search Result 1 source: ...
+    Search Result 1 summary: ...
+    Search Result 2 source: ...
+    Search Result 2 summary: ...
+    ...
     """
 )
