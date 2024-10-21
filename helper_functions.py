@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_community.document_loaders import PyMuPDFLoader, TextLoader, UnstructuredURLLoader, WebBaseLoader
 from langchain_community.vectorstores import Qdrant
@@ -142,3 +142,6 @@ def create_agent(
     agent = create_openai_functions_agent(llm, tools, prompt)
     executor = AgentExecutor(agent=agent, tools=tools)
     return executor
+
+def format_docs(docs: List[Dict]) -> str:
+    return "\n\n".join(f"Content: {doc.page_content}\nSource: {doc.metadata.get('source', 'Unknown')}" for doc in docs)
