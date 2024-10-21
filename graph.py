@@ -1,4 +1,4 @@
-from typing import Dict, TypedDict, Annotated, Sequence
+from typing import Dict, List, TypedDict, Annotated, Sequence
 from langgraph.graph import Graph, StateGraph, END
 from langgraph.prebuilt import ToolExecutor
 from langchain.schema import StrOutputParser
@@ -12,11 +12,14 @@ from operator import itemgetter
 # Define the state structure
 class State(TypedDict):
     messages: Sequence[str]
+    topic: str
     research_data: Dict[str, str]
-    draft_post: str
+    team_members: List[str]
+    draft_posts: Sequence[str]
     final_post: str
 
 
+research_members = ["Qdrant_researcher", "Web_researcher"]
 # Research Agent Pieces
 qdrant_research_chain = (
         {"context": itemgetter("topic") | models.compression_retriever, "topic": itemgetter("topic")}
@@ -34,10 +37,10 @@ tavily_chain = (
 
 def query_qdrant(state: State) -> State:
     # Extract the last message as the input
-    input_text = state["messages"][-1]
+    topic = state["topic"]
 
     # Run the chain
-    result = qdrant_research_chain.invoke({"topic": input_text})
+    result = qdrant_research_chain.invoke({"topic": topic})
 
     # Update the state with the research results
     state["research_data"]["qdrant_results"] = result
@@ -46,7 +49,7 @@ def query_qdrant(state: State) -> State:
 
 def web_search(state: State) -> State:
     # Extract the last message as the topic
-    topic = state["messages"][-1]
+    topic = state["topic"]
     
     # Get the Qdrant results from the state
     qdrant_results = state["research_data"].get("qdrant_results", "No previous results available.")
@@ -99,11 +102,15 @@ research_graph.add_node("research_supervisor", research_supervisor)
 
 research_graph.add_edge("query_qdrant", "research_supervisor")
 research_graph.add_edge("web_search", "research_supervisor")
-research_graph.add_edge("research_supervisor", "query_qdrant")
-research_graph.add_edge("research_supervisor", "web_search")
-research_graph.add_edge("research_supervisor", END)
+research_graph.add_conditional_edges(
+    "research_supervisor",
+    lambda x: x["next"],
+    {"query_qdrant": "query_qdrant", "web_search": "web_search", "FINISH": END},
+)
+#research_graph.add_edge("research_supervisor", END)
 
 research_graph.set_entry_point("research_supervisor")
+research_graph_comp = research_graph.compile()
 
 # Create the writing team graph
 writing_graph = StateGraph(State)
@@ -114,14 +121,24 @@ writing_graph.add_node("voice_editing", voice_editing)
 writing_graph.add_node("post_review", post_review)
 writing_graph.add_node("writing_supervisor", writing_supervisor)
 
-writing_graph.add_edge("writing_supervisor", "post_creation")
-writing_graph.add_edge("post_creation", "copy_editing")
-writing_graph.add_edge("copy_editing", "voice_editing")
-writing_graph.add_edge("voice_editing", "post_review")
+writing_graph.add_edge("post_creation", "writing_supervisor")
+writing_graph.add_edge("copy_editing", "writing_supervisor")
+writing_graph.add_edge("voice_editing", "writing_supervisor")
 writing_graph.add_edge("post_review", "writing_supervisor")
-writing_graph.add_edge("writing_supervisor", END)
+writing_graph.add_conditional_edges(
+    "writing_supervisor",
+    lambda x: x["next"],
+    {"post_creation": "post_creation", 
+     "copy_editing": "copy_editing",
+     "voice_editing": "voice_editing",
+     "post_review": "post_review",
+     "FINISH": END},
+)
+#writing_graph.add_edge("writing_supervisor", END)
 
 writing_graph.set_entry_point("writing_supervisor")
+
+writing_graph_comp = research_graph.compile()
 
 # Create the overall graph
 overall_graph = StateGraph(State)
@@ -136,11 +153,15 @@ overall_graph.add_node("overall_supervisor", overall_supervisor)
 overall_graph.set_entry_point("overall_supervisor")
 
 # Connect the nodes
-overall_graph.add_edge("overall_supervisor", "research_team")
 overall_graph.add_edge("research_team", "overall_supervisor")
-overall_graph.add_edge("overall_supervisor", "writing_team")
 overall_graph.add_edge("writing_team", "overall_supervisor")
-overall_graph.add_edge("overall_supervisor", END)
+overall_graph.add_conditional_edges(
+    "overall_supervisor",
+    lambda x: x["next"],
+    {"research_team": "research_team", 
+     "writing_team": "writing_team",
+     "FINISH": END},
+)
 
 # Compile the graph
 app = overall_graph.compile()
