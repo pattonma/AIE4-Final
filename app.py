@@ -21,13 +21,14 @@ def rename(orig_author: str):
 
 @cl.on_message
 async def main(message: cl.Message):
-    await cl.Message(f"Processing `{message.content}`", disable_human_feedback=True)
+    # await cl.Message(f"Processing `{message.content}`", disable_human_feedback=True)
     if message.content.startswith("http://") or message.content.startswith("https://"):
         message_type = "url"
     else:
         message_type = "question"
 
     if message_type == "url":
+        await cl.Message(content=f"Processing `{message.content}`", disable_human_feedback=True).send()
         try:
             # Run the document loading and splitting in a thread
             docs = await asyncio.to_thread(load_documents_from_url, message.content)
