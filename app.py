@@ -50,8 +50,9 @@ async def main(message: cl.Message):
             await cl.Message(f"Error processing the document: {e}").send()
     else:
         # Handle the question as usual
+        await cl.Message(content="Thinking about it, give me a second...", disable_human_feedback=True).send()
         response = await asyncio.to_thread(retrieval_augmented_qa_chain.invoke, {"question": message.content})
-        await cl.Message(content=response).send()
+        await cl.Message(content=response.content).send()
 
     res = await ask_action()
     await handle_response(res)
