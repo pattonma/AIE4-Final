@@ -205,13 +205,20 @@ post_review_prompt = ChatPromptTemplate.from_template(
 
     You will be given the current draft of the post, and the organization's writing style guide.
 
-    Checking the draft's spelling and grammar, as well as the sentence strucutre, tone, and style against the writing guide, determine if the current draft of the post is acceptable.
-    If it is not, please give your reasoning why, and what should be changed.
+    Review the draft's content, overall message, and general adherence to the writing guide. Focus on major issues that significantly impact the post's effectiveness or professionalism. Minor stylistic variations should not be grounds for rejection.
+
+    Consider the following when reviewing:
+    1. Does the post convey its main message clearly?
+    2. Is the tone appropriate for a professional social media post about mental health in the workplace?
+    3. Are there any major factual errors or misrepresentations?
+    4. Does the post generally follow the key principles of the writing guide?
+
+    If there are only minor issues that don't significantly impact the post's quality, consider the draft acceptable.
 
     Current draft: {current_draft}
     Style guide: {styleguide}
 
-    Your output should be a json object in the follwoing format, but should **not** include the triple backticks or the 'json' label:
+    Your output should be a json object in the following format, but should **not** include the triple backticks or the 'json' label:
     {{
         "Draft Acceptable": (Yes/No),
         "Comments on current draft": (comments)
