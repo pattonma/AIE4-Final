@@ -59,7 +59,7 @@ async def main(message: cl.Message):
         #response = await asyncio.to_thread(retrieval_augmented_qa_chain.invoke, {"question": message.content})
         response = await asyncio.to_thread(graph.getSocialMediaPost,  message.content)
         print(response)
-        await cl.Message(content=response.content).send()
+        await cl.Message(content=response).send()
         res = await ask_action()
         await handle_response(res)
 
