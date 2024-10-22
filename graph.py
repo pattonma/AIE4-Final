@@ -215,7 +215,8 @@ def overall_supervisor(state):
     init_user_query = state["user_input"]
     message_to_manager = state['message_to_manager']
     last_active_team = state['last_active_team']
-    supervisor_result = overall_supervisor_chain.invoke({"query": init_user_query, "message_to_manager": message_to_manager, "last_active_team": last_active_team})
+    final_post = state['final_post']
+    supervisor_result = overall_supervisor_chain.invoke({"query": init_user_query, "message_to_manager": message_to_manager, "last_active_team": last_active_team, "final_post": final_post})
     print(supervisor_result)
     lines = supervisor_result.split('\n')
     for line in lines:

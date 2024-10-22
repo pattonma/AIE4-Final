@@ -100,15 +100,18 @@ overall_supervisor_prompt = ChatPromptTemplate.from_template(
 
     After determining the topic, or if a specific topic has already been supplied, you must determine which of the teams should perform their task next.
 
-    The available actions are the names of your teams (to indicate which team should run next), or 'FINISH' to indicate that a sufficient quality social media post is ready to share with the user.
+    The available actions are the names of your teams (to indicate which team should run next), or 'FINISH' to indicate that the writing team has sent you a sufficient quality social media post draft that is ready to share with the user.
 
     To help you determine which team should run next, or if the post is ready to share with the user, you will have access to the latest team supervisor requests and messages, as well as a flag indicating which team was most recently active.
 
     If you have to pass along a message to the next team, such as if the writing team had asked that the research team collect more information, or if you want to give specific direction to a supervisor, you can do so.
 
+    If the writing team has given you a quality final post draft, it will be suplied to you as well.
+
     User query: {query}
     Team message: {message_to_manager}
     Last active team: {last_active_team}
+    Final post: {final_draft}
 
     Output: 
     Extracted Topic: ...
