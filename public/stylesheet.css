@@ -30,6 +30,10 @@ indigo: #5461cb
   background-color: #279af1 !important
 }
 
+.MuiStack-root .markdown-body {
+  color: #5461cb !important;
+}
+
 .MuiStack-root .markdown-body p {
   color: #5461cb !important;
 }
