@@ -45,17 +45,20 @@ async def main(message: cl.Message):
             await asyncio.to_thread(qdrant_store.add_documents, splits)
 
             await cl.Message(f"Processing `{message.content}` done. You can now ask questions!").send()
+            
 
         except Exception as e:
             await cl.Message(f"Error processing the document: {e}").send()
+        
+        res = await ask_action()
+        await handle_response(res)
     else:
         # Handle the question as usual
         await cl.Message(content="Thinking about it, give me a second...", disable_human_feedback=True).send()
         response = await asyncio.to_thread(retrieval_augmented_qa_chain.invoke, {"question": message.content})
         await cl.Message(content=response.content).send()
-
-    res = await ask_action()
-    await handle_response(res)
+        res = await ask_action()
+        await handle_response(res)
 
 
 ## Chainlit helper functions
