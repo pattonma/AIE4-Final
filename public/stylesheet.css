@@ -34,6 +34,10 @@ indigo: #5461cb
   color: #5461cb !important;
 }
 
+.MuiStack-root .markdown-body ol {
+  color: #5461cb !important;
+}
+
 #new-chat-button {
   background-color: #279af1 !important
 }
