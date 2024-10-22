@@ -80,7 +80,9 @@ def add_to_qdrant(documents, embeddings, qdrant_client, collection_name):
 
 def agent_node(state, agent, name):
     result = agent.invoke(state)
-    return {"messages": [HumanMessage(content=result["output"], name=name)]}
+    return {
+        "messages": [HumanMessage(content=result["messages"][-1].content, name=name)]
+    }
 
 def create_team_agent(llm, tools, system_prompt, agent_name, team_members):
     return create_agent(

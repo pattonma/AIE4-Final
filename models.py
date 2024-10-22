@@ -122,10 +122,11 @@ qdrant_client = QdrantClient(url=constants.QDRANT_ENDPOINT, api_key=constants.QD
 #    collection_name="docs_from_ripped_urls_recursive",
 #    embedding=te3_small
 #)
+collection_name="docs_from_ripped_urls_semantic_tuned"
 
 semantic_tuned_Qdrant_vs = QdrantVectorStore(
     client=qdrant_client,
-    collection_name="docs_from_ripped_urls_semantic_tuned",
+    collection_name=collection_name,
     embedding=tuned_embeddings
 )
 

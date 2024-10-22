@@ -2,6 +2,7 @@ import chainlit as cl
 from helper_functions import process_file, load_documents_from_url
 import models
 import agents
+import graph
 import asyncio
 
 @cl.on_chat_start
@@ -54,8 +55,10 @@ async def main(message: cl.Message):
         await handle_response(res)
     else:
         # Handle the question as usual
-        await cl.Message(content="Thinking about it, give me a second...", disable_human_feedback=True).send()
-        response = await asyncio.to_thread(retrieval_augmented_qa_chain.invoke, {"question": message.content})
+        await cl.Message(content="Our specialist is working...", disable_human_feedback=True).send()
+        #response = await asyncio.to_thread(retrieval_augmented_qa_chain.invoke, {"question": message.content})
+        response = await asyncio.to_thread(graph.getSocialMediaPost,  message.content)
+        print(response)
         await cl.Message(content=response.content).send()
         res = await ask_action()
         await handle_response(res)
