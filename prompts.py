@@ -165,6 +165,8 @@ post_creation_prompt = ChatPromptTemplate.from_template(
 
     Using the data, write a draft of a social media post about the topic. Do not make up new facts or data to base your post on, use only the data provided. Where possible, also include the source of the information you use in the post.
 
+    The post should not be more than 200 words.
+
     Topic: {topic}
     Drafts so far: {drafts}
     Collected data: {collected_data}
