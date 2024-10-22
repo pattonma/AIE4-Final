@@ -111,7 +111,7 @@ overall_supervisor_prompt = ChatPromptTemplate.from_template(
     User query: {query}
     Team message: {message_to_manager}
     Last active team: {last_active_team}
-    Final post: {final_draft}
+    Final post: {final_post}
 
     Output: 
     Extracted Topic: ...
