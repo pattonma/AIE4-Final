@@ -99,8 +99,10 @@ async def handle_response(res):
         await asyncio.to_thread(qdrant_store.add_documents, splits)
         await cl.Message(content="added to vs").send()
 
-        msg.content = f"Processing `{file.name}` done. You can now ask questions!"
-        await msg.update()
+        await cl.Message(content=f"Processing `{file.name}` done.").send()
+
+        res = await ask_action()
+        await handle_response(res)
     
     if res and res.get("value") == "url":
         await cl.Message(content="Submit a url link in the message box below.").send()
