@@ -322,7 +322,7 @@ def getSocialMediaPost(userInput: str) -> str:
         last_active_team="",
         review_comments=""
     )
-    results = app.invoke(initial_state)
+    results = app.invoke(initial_state, {"recursion_limit": 40})
     try:
         results = app.invoke(initial_state, {"recursion_limit": 40})
     except GraphRecursionError:
