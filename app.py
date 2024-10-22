@@ -69,9 +69,9 @@ async def ask_action():
     res = await cl.AskActionMessage(
         content="Pick an action!",
         actions=[
-            cl.Action(name="Question", value="question", label="Ask a question"),
-            cl.Action(name="File", value="file", label="Upload a file"),
-            cl.Action(name="Url", value="url", label="Upload a URL"),
+            cl.Action(name="Question", value="question", label="Create a post"),
+            cl.Action(name="File", value="file", label="Import a file"),
+            cl.Action(name="Url", value="url", label="Import a Webpage"),
         ],
     ).send()
     return res
@@ -114,4 +114,4 @@ async def handle_response(res):
         await cl.Message(content="Submit a url link in the message box below.").send()
    
     if res and res.get("value") == "question":
-        await cl.Message(content="Ask away!").send()
+        await cl.Message(content="Give us your idea!").send()
