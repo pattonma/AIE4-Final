@@ -45,56 +45,44 @@ research_supervisor_chain = (
 #   Reserach Node Defs
 #
 def query_qdrant(state: ResearchState) -> ResearchState:
-    #print("qdrant node")
     topic = state["topic"]
     result = qdrant_research_chain.invoke({"topic": topic})
-    #print(result)
+    print(result)
     state["research_data"]["qdrant_results"] = result["response"]
     state['workflow'].append("query_qdrant")
-    #print(state['workflow'])
+    print(state['workflow'])
 
     return state
 
 def web_search(state: ResearchState) -> ResearchState:
-    #print("tavily node")
-    # Extract the last message as the topic
     topic = state["topic"]
-    #print(topic)
-    # Get the Qdrant results from the state
     qdrant_results = state["research_data"].get("qdrant_results", "No previous results available.")
-    # Run the web search chain
-    result = tavily_chain.invoke({
-        "topic": topic,
-        "qdrant_results": qdrant_results
-    })
-    #print(result)
-    # Update the state with the web search results
+    result = tavily_chain.invoke({"topic": topic,"qdrant_results": qdrant_results })
+    print(result)
     state["research_data"]["web_search_results"] = result
     state['workflow'].append("web_search")
-    #print(state['workflow'])
+    print(state['workflow'])
     return state
 
 def research_supervisor(state):
-    #print("research supervisor node")
     message_from_manager = state["message_from_manager"]
     collected_data = state["research_data"]
     topic = state['topic']
     supervisor_result = research_supervisor_chain.invoke({"message_from_manager": message_from_manager, "collected_data": collected_data, "topic": topic})
     lines = supervisor_result.split('\n')
-    #print(supervisor_result)
+    print(supervisor_result)
     for line in lines:
         if line.startswith('Next Action: '):
             state['next'] = line[len('Next Action: '):].strip()  # Extract the next action content
         elif line.startswith('Message to project manager: '):
             state['message_to_manager'] = line[len('Message to project manager: '):].strip()
     state['workflow'].append("research_supervisor")
-    #print(state['workflow'])
+    print(state['workflow'])
     return state
 
 def research_end(state):
-    #print("research_end node")
     state['workflow'].append("research_end")
-    #print(state['workflow'])
+    print(state['workflow'])
     return state
 
 #######################################
@@ -135,24 +123,26 @@ post_review_chain = (
 #   Writing Node Defs
 #
 def post_creation(state):
-    print("post_creation node")
     topic = state['topic']
     drafts = state['draft_posts']
     collected_data = state["research_data"]
     review_comments = state['review_comments']
     results = post_creation_chain.invoke({"topic": topic, "collected_data": collected_data, "drafts": drafts, "review_comments": review_comments})
+    print(results)
     state['draft_posts'].append(results)
     state['workflow'].append("post_creation")
+    print(state['workflow'])
     return state
 
 def post_editor(state):
-    print("post_editor node")
     current_draft = state['draft_posts'][-1]
     styleguide = prompts.style_guide_text
     review_comments = state['review_comments']
     results = post_editor_chain.invoke({"current_draft": current_draft, "styleguide": styleguide, "review_comments": review_comments})
+    print(results)
     state['draft_posts'].append(results)
     state['workflow'].append("post_editor")
+    print(state['workflow'])
     return state
 
 def post_review(state):
@@ -160,11 +150,13 @@ def post_review(state):
     current_draft = state['draft_posts'][-1]
     styleguide = prompts.style_guide_text
     results = post_review_chain.invoke({"current_draft": current_draft, "styleguide": styleguide})
+    print(results)
     data = json.loads(results.strip())
     state['review_comments'] = data["Comments on current draft"]
     if data["Draft Acceptable"] == 'Yes':
         state['final_post'] = state['draft_posts'][-1]
     state['workflow'].append("post_review")
+    print(state['workflow'])
     return state
 
 def writing_end(state):
@@ -181,14 +173,15 @@ def writing_supervisor(state):
     final_draft = state['final_post']
     review_comments = state['review_comments']
     supervisor_result = writing_supervisor_chain.invoke({"review_comments": review_comments, "message_from_manager": message_from_manager, "topic": topic, "drafts": drafts, "final_draft": final_draft})
-    lines = supervisor_result.split('\n')
     print(supervisor_result)
+    lines = supervisor_result.split('\n')
     for line in lines:
         if line.startswith('Next Action: '):
             state['next'] = line[len('Next Action: '):].strip()  # Extract the next action content
         elif line.startswith('Message to project manager: '):
             state['message_to_manager'] = line[len('Message to project manager: '):].strip()
     state['workflow'].append("writing_supervisor")
+    print(state['workflow'])
     return state
 
 #######################################
@@ -219,14 +212,12 @@ overall_supervisor_chain = (
 #   Complete Graph Node defs
 #
 def overall_supervisor(state):
-    print("overall supervisor node")
-    # Implement overall supervision logic
     init_user_query = state["user_input"]
     message_to_manager = state['message_to_manager']
     last_active_team = state['last_active_team']
     supervisor_result = overall_supervisor_chain.invoke({"query": init_user_query, "message_to_manager": message_to_manager, "last_active_team": last_active_team})
-    lines = supervisor_result.split('\n')
     print(supervisor_result)
+    lines = supervisor_result.split('\n')
     for line in lines:
         if line.startswith('Next Action: '):
             state['next_team'] = line[len('Next Action: '):].strip()  # Extract the next action content
@@ -235,7 +226,6 @@ def overall_supervisor(state):
         elif line.startswith('Message to supervisor: '):
             state['message_from_manager'] = line[len('Message to supervisor: '):].strip()  # Extract the next action content
     state['workflow'].append("overall_supervisor")
-    print(state['next_team'])
     print(state['workflow'])
     return state
 
@@ -333,7 +323,7 @@ def getSocialMediaPost(userInput: str) -> str:
     )
     results = app.invoke(initial_state)
     try:
-        results = app.invoke(initial_state, {"recursion_limit": 30})
+        results = app.invoke(initial_state, {"recursion_limit": 40})
     except GraphRecursionError:
         return "Recursion Error"
     finalPost = results['final_post']
